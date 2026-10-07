@@ -29,7 +29,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: model
-          path: model.pkl
+          path: data/model.pkl
 
   test:
     runs-on: ubuntu-latest
@@ -54,8 +54,14 @@ jobs:
           name: model
           path: .
 
+      - name: Place model where app expects it
+        run: |
+          mkdir -p data
+          if [ -f model.pkl ]; then mv model.pkl data/model.pkl; fi
+          ls -R
+
       - name: Run Flask tests
-        run: pytest -v
+        run: pytest -v test_api.py
 
   build:
     runs-on: ubuntu-latest
@@ -79,6 +85,12 @@ jobs:
         with:
           name: model
           path: .
+
+      - name: Place model where Docker build expects it
+        run: |
+          mkdir -p data
+          if [ -f model.pkl ]; then mv model.pkl data/model.pkl; fi
+          ls -R
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
